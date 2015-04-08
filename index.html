@@ -1,92 +1,94 @@
 <html>
-  <head>
-    <!-- Pull the engine from the Quintus CDN or load it locally -->
-    <!-- (use quintus-all.min.js for production) -->
-    <script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
-  </head>
-   <body>
-     <script>
+    <head>
+        <!-- Pull the engine from the Quintus CDN or load it locally -->
+        <!-- (use quintus-all.min.js for production) -->
+        <script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
+        <style>
+        </style>
+    </head>
+    <body>
+        <canvas id='Geede5' width="800" height="600"></canvas>
+        <script>
 
-      // Now set up your game (most games will load a separate .js file)
-      var Q = Quintus()                          // Create a new engine instance
-              .include("Sprites, Scenes, Input, 2D, Touch, UI") // Load any needed modules
-              .setup()                           // Add a canvas element onto the page
-              .controls()                        // Add in default controls (keyboard, buttons)
-              .touch();                          // Add in touch support (for the UI)
+          // Now set up your game (most games will load a separate .js file)
+          var Q = Quintus()                          // Create a new engine instance
+                  .include("Sprites, Scenes, Input, 2D, Touch, UI") // Load any needed modules
+                  .setup("Geede5")                   // Add a canvas element onto the page
+                  .controls()                        // Add in default controls (keyboard, buttons)
+                  .touch();                          // Add in touch support (for the UI)
 
-      Q.Sprite.extend("Player",{
-        init: function(p) {
-          this._super(p, { sheet: "player", x: 410, y: 90 });
-          this.add('2d, platformerControls');
+          Q.Sprite.extend("Player",{
+            init: function(p) {
+              this._super(p, { sheet: "player", x: 410, y: 90 });
+              this.add('2d, platformerControls');
 
-          this.on("hit.sprite",function(collision) {
-            if(collision.obj.isA("Tower")) {
-              Q.stageScene("endGame",1, { label: "You Won!" });
-              this.destroy();
-            }
-          });
-        }
-      });
-
-      Q.Sprite.extend("Tower", {
-        init: function(p) {
-          this._super(p, { sheet: 'tower' });
-        }
-      });
-
-      Q.Sprite.extend("Enemy",{
-        init: function(p) {
-          this._super(p, { sheet: 'enemy', vx: 100 });
-          this.add('2d, aiBounce');
-
-          this.on("bump.left,bump.right,bump.bottom",function(collision) {
-            if(collision.obj.isA("Player")) {
-              Q.stageScene("endGame",1, { label: "You Died" });
-              collision.obj.destroy();
+              this.on("hit.sprite",function(collision) {
+                if(collision.obj.isA("Tower")) {
+                  Q.stageScene("endGame",1, { label: "You Won!" });
+                  this.destroy();
+                }
+              });
             }
           });
 
-          this.on("bump.top",function(collision) {
-            if(collision.obj.isA("Player")) {
-              this.destroy();
-              collision.obj.p.vy = -300;
+          Q.Sprite.extend("Tower", {
+            init: function(p) {
+              this._super(p, { sheet: 'tower' });
             }
           });
-        }
-      });
 
-      Q.scene("level1",function(stage) {
-        stage.collisionLayer(new Q.TileLayer({ dataAsset: 'level.json', sheet: 'tiles' }));
-        var player = stage.insert(new Q.Player());
+          Q.Sprite.extend("Enemy",{
+            init: function(p) {
+              this._super(p, { sheet: 'enemy', vx: 100 });
+              this.add('2d, aiBounce');
 
-        stage.add("viewport").follow(player);
+              this.on("bump.left,bump.right,bump.bottom",function(collision) {
+                if(collision.obj.isA("Player")) {
+                  Q.stageScene("endGame",1, { label: "You Died" });
+                  collision.obj.destroy();
+                }
+              });
 
-        stage.insert(new Q.Enemy({ x: 700, y: 0 }));
-        stage.insert(new Q.Enemy({ x: 800, y: 0 }));
+              this.on("bump.top",function(collision) {
+                if(collision.obj.isA("Player")) {
+                  this.destroy();
+                  collision.obj.p.vy = -300;
+                }
+              });
+            }
+          });
 
-        stage.insert(new Q.Tower({ x: 180, y: 50 }));
-      });
+          Q.scene("level1",function(stage) {
+            stage.collisionLayer(new Q.TileLayer({ dataAsset: 'level.json', sheet: 'tiles' }));
+            var player = stage.insert(new Q.Player());
 
-      Q.scene('endGame',function(stage) {
-        var box = stage.insert(new Q.UI.Container({
-          x: Q.width/2, y: Q.height/2, fill: "rgba(0,0,0,0.5)"
-        }));
+            stage.add("viewport").follow(player);
 
-        var label = box.insert(new Q.UI.Text({x:10, y: -10 - button.p.h,
-                                              label: stage.options.label }));
-        button.on("click",function() {
-          Q.clearStages();
-          Q.stageScene('level1');
-        });
-        box.fit(20);
-      });
+            stage.insert(new Q.Enemy({ x: 700, y: 0 }));
+            stage.insert(new Q.Enemy({ x: 800, y: 0 }));
 
-      Q.load("sprites.png, sprites.json, level.json, tiles.png", function() {
-        Q.sheet("tiles","tiles.png", { tilew: 32, tileh: 32 });
-        Q.compileSheets("sprites.png","sprites.json");
-        Q.stageScene("level1");
-      });
+            stage.insert(new Q.Tower({ x: 180, y: 50 }));
+          });
 
-   </script>
-   </body>
+          Q.scene('endGame',function(stage) {
+            var box = stage.insert(new Q.UI.Container({
+              x: Q.width/2, y: Q.height/2, fill: "rgba(0,0,0,0.5)"
+            }));
+
+            var label = box.insert(new Q.UI.Text({x:10, y: -10 - button.p.h,
+                                                  label: stage.options.label }));
+            button.on("click",function() {
+              Q.clearStages();
+              Q.stageScene('level1');
+            });
+            box.fit(20);
+          });
+
+          Q.load("sprites.png, sprites.json, level.json, tiles.png", function() {
+            Q.sheet("tiles","tiles.png", { tilew: 32, tileh: 32 });
+            Q.compileSheets("sprites.png","sprites.json");
+            Q.stageScene("level1");
+          });
+        </script>
+    </body>
 </html>
