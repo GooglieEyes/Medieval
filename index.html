@@ -7,13 +7,13 @@
         </style>
     </head>
     <body>
-        <canvas id='Geede5' width="800" height="600"></canvas>
+        <canvas id='Medieval' width="800" height="600"></canvas>
         <script>
 
           // Now set up your game (most games will load a separate .js file)
           var Q = Quintus()                          // Create a new engine instance
                   .include("Sprites, Scenes, Input, 2D, Touch, UI") // Load any needed modules
-                  .setup("Geede5")                   // Add a canvas element onto the page
+                  .setup("Medieval")                 // Add a canvas element onto the page
                   .controls()                        // Add in default controls (keyboard, buttons)
                   .touch();                          // Add in touch support (for the UI)
 
@@ -21,25 +21,34 @@
             init: function(p) {
               this._super(p, { sheet: "player", x: 410, y: 90 });
               this.add('2d, platformerControls');
+            }
+          });
 
-              this.on("hit.sprite",function(collision) {
-                if(collision.obj.isA("Tower")) {
+          Q.Sprite.extend("Ogre", {
+            init: function(p) {
+              this._super(p, { sheet: 'ogre', vx: 100 });
+              this.add('2d, aiBounce');
+
+              this.on("bump.left,bump.right,bump.bottom",function(collision) {
+                if(collision.obj.isA("Player")) {
+                  Q.stageScene("endGame",1, { label: "You Died" });
+                  collision.obj.destroy();
+                }
+              });
+
+              this.on("bump.top",function(collision) {
+                if(collision.obj.isA("Player")) {
                   Q.stageScene("endGame",1, { label: "You Won!" });
                   this.destroy();
+                  collision.obj.p.vy = -300;
                 }
               });
             }
           });
 
-          Q.Sprite.extend("Tower", {
+          Q.Sprite.extend("Skeleton",{
             init: function(p) {
-              this._super(p, { sheet: 'tower' });
-            }
-          });
-
-          Q.Sprite.extend("Enemy",{
-            init: function(p) {
-              this._super(p, { sheet: 'enemy', vx: 100 });
+              this._super(p, { sheet: 'skeleton', vx: 100 });
               this.add('2d, aiBounce');
 
               this.on("bump.left,bump.right,bump.bottom",function(collision) {
@@ -60,14 +69,17 @@
 
           Q.scene("level1",function(stage) {
             stage.collisionLayer(new Q.TileLayer({ dataAsset: 'level.json', sheet: 'tiles' }));
-            var player = stage.insert(new Q.Player());
+            var player = stage.insert(new Q.Player({x:28*32, y:0  }));
 
             stage.add("viewport").follow(player);
 
-            stage.insert(new Q.Enemy({ x: 700, y: 0 }));
-            stage.insert(new Q.Enemy({ x: 800, y: 0 }));
+            stage.insert(new Q.Skeleton({ x: 20*32, y: 0 }));
+            stage.insert(new Q.Skeleton({ x: 34*32, y: 0 }));
+            stage.insert(new Q.Skeleton({ x: 35*32, y: 0 }));
+            stage.insert(new Q.Skeleton({ x: 36*32, y: 0 }));
+            stage.insert(new Q.Skeleton({ x: 42*32, y: 0 }));
 
-            stage.insert(new Q.Tower({ x: 180, y: 50 }));
+            stage.insert(new Q.Ogre({ x: 50, y: 0 }));
           });
 
           Q.scene('endGame',function(stage) {
